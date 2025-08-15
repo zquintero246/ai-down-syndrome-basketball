@@ -1,37 +1,32 @@
 using UnityEngine;
 
+[RequireComponent(typeof(Rigidbody))]
 public class PlayerMovement : MonoBehaviour
 {
-    public float speed = 5f;
-    public Transform cameraTransform; // arrastra la cámara aquí
-
+    public float speed = 5f; 
     private Rigidbody rb;
+    private Vector3 moveInput;
+    private Vector3 moveVelocity;
+
+    public bool IsMoving => moveInput.sqrMagnitude > 0.001f; // <- para detectar movimiento
 
     void Start()
     {
         rb = GetComponent<Rigidbody>();
+        rb.freezeRotation = true;
+    }
+
+    void Update()
+    {
+        float h = Input.GetAxisRaw("Horizontal");
+        float v = Input.GetAxisRaw("Vertical");
+        moveInput = new Vector3(h, 0f, v).normalized;
+        moveVelocity = moveInput * speed;
     }
 
     void FixedUpdate()
     {
-        // Entrada
-        float horizontal = Input.GetAxis("Horizontal");
-        float vertical = Input.GetAxis("Vertical");
-
-        // Dirección de la cámara proyectada en el plano horizontal
-        Vector3 camForward = cameraTransform.forward;
-        camForward.y = 0f;
-        camForward.Normalize();
-
-        Vector3 camRight = cameraTransform.right;
-        camRight.y = 0f;
-        camRight.Normalize();
-
-        // Dirección final de movimiento
-        Vector3 moveDir = camForward * vertical + camRight * horizontal;
-
-        // Mover al jugador
-        rb.MovePosition(rb.position + moveDir * speed * Time.fixedDeltaTime);
+        rb.MovePosition(rb.position + moveVelocity * Time.fixedDeltaTime);
     }
 }
 
